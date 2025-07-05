@@ -1,0 +1,8 @@
+OPENAI_API_KEY=tu_openai_api_key
+TELEGRAM_BOT_TOKEN=tu_telegram_bot_token
+MODEL_OPEN_AI=gpt-4o-mini
+
+LANGSMITH_TRACING=false #cambiar a true si se desea trackear con langsmith
+LANGSMITH_ENDPOINT="https://api.smith.langchain.com"
+LANGSMITH_API_KEY="tu_api_key"
+LANGSMITH_PROJECT="nombre_del_proyecto"
