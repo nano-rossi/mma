@@ -6,9 +6,16 @@ from langchain_community.agent_toolkits.sql.base import create_sql_agent
 from langchain_community.utilities import SQLDatabase
 from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
 from langchain.agents.agent_types import AgentType
-from langchain_community.chat_models import ChatOpenAI as CommunityChatOpenAI
+#from langchain_community.chat_models import ChatOpenAI as CommunityChatOpenAI
+from langchain_openai import ChatOpenAI
 import asyncio
 from dotenv import load_dotenv
+import logging
+
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+) 
 
 app = FastAPI()
 
@@ -27,7 +34,7 @@ class QueryRequest(BaseModel):
 sqlite_uri = "sqlite:///chinook.db"
 db = SQLDatabase.from_uri(sqlite_uri)
 
-llm = CommunityChatOpenAI(
+llm = ChatOpenAI(
     temperature=0,
     model=MODEL_OPEN_AI,
     api_key=OPENAI_API_KEY,
@@ -47,6 +54,7 @@ agent = create_sql_agent(
 )
 
 async def procesar_y_responder(request: QueryRequest):
+    logging.info(f"Procesando consulta: {request.query}")
     try:
         result = await agent.ainvoke({
             "input": (
@@ -60,22 +68,23 @@ async def procesar_y_responder(request: QueryRequest):
         answer = result['output'] if isinstance(result, dict) and 'output' in result else str(result)
     except Exception as e:
         answer = f"Error al procesar la consulta: {str(e)}"
-
+    logging.info(f"Respuesta: {answer}")
     payload = {
         "chat_id": request.chat_id,
         "text": answer
     }
-
+    logging.info(f"Enviando respuesta a Telegram: {payload}")   
     try:
         resp = requests.post(TELEGRAM_API_URL, json=payload)
         resp.raise_for_status()
     except Exception as e:
+        logging.error(f"Error al enviar respuesta a Telegram: {str(e)}")
         return {"ok": False, "error": str(e), "answer": answer}
     return {"ok": True, "answer": answer} 
 
 
 @app.post("/query")
 async def query_endpoint(request: QueryRequest):
-    # Responder rápido al cliente
+    logging.info(f"Recibida consulta: {request.query}")
     asyncio.create_task(procesar_y_responder(request))
     return {"ok": True}
