@@ -31,7 +31,7 @@ class QueryRequest(BaseModel):
     chat_id: int
 
 # Configurar la conexión a SQLite para LangChain
-sqlite_uri = "sqlite:///chinook.db"
+sqlite_uri = "sqlite:///src/db/chinook.db"
 db = SQLDatabase.from_uri(sqlite_uri)
 
 llm = ChatOpenAI(
