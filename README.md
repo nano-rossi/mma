@@ -50,3 +50,27 @@ El agente procesa la consulta, consulta la base SQLite y responde al chat de Tel
 
 ## Notas
 - El modelo de OpenAI usado por defecto es gpt-4o.mini (puedes cambiarlo con la variable de entorno `MODEL_OPEN_AI`).
+
+## Diagrama de flujo de la aplicación
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario (Telegram)
+    participant T as Bot de Telegram
+    participant F as FastAPI
+    participant L as LangChain Agent
+    participant D as Base de Datos (SQLite)
+
+    U->>T: Envía mensaje (consulta)
+    T->>F: POST /query (chat_id, query)
+    F->>L: Procesa consulta con LangChain
+    L->>D: Consulta SQL
+    D-->>L: Respuesta SQL
+    L-->>F: Respuesta generada
+    F->>T: Envía respuesta por API Telegram
+    T->>U: Responde al usuario en Telegram
+```
+```
+
+## Notas
+- El modelo de OpenAI usado por defecto es gpt-4o.mini (puedes cambiarlo con la variable de entorno `MODEL_OPEN_AI`).
